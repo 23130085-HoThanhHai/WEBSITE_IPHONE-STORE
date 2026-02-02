@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apple Shops - Login</title>
+
+    <!-- Google font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Style -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+    />
+
+    <style>
+      .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: var(--greyColor);
+      }
+
+      .auth-box {
+        background: var(--whiteColor);
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+        width: 350px;
+        text-align: center;
+      }
+
+      .auth-box h1 {
+        color: var(--primaryColor);
+        margin-bottom: 20px;
+      }
+
+      .auth-box input {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        border: 1px solid var(--spanColor);
+        border-radius: 5px;
+      }
+
+      .auth-box input:focus {
+        border-color: var(--primaryColor);
+      }
+
+      .btn-auth {
+        width: 100%;
+        background: var(--primaryColor);
+        color: var(--whiteColor);
+        border: none;
+        padding: 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.3s;
+      }
+
+      .btn-auth:hover {
+        background: var(--yellowColor);
+        color: var(--fontColor);
+      }
+
+      .auth-box p {
+        margin-top: 15px;
+        color: var(--spanColor);
+      }
+
+      .auth-box a {
+        color: var(--primaryColor);
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .auth-box a:hover {
+        color: var(--yellowColor);
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <h2 class="logo">Apple Shop</h2>
+      <div class="menu-list">
+        <a href="{% url 'index' %}">Home</a>
+        <a href="{% url 'contact' %}">Contact</a>
+      </div>
+    </nav>
+
+    <div class="auth-container">
+      <div class="auth-box">
+        <h1>Login</h1>
+        <form action="{% url 'login' %}" method="post">
+          {% csrf_token %}
+          
+          {% if form.non_field_errors %}
+            <p style="color: red">{{ form.non_field_errors.0 }}</p>
+          {% endif %}
+
+          <input type="text" name="username" placeholder="Username" required />
+          <input type="password" name="password" placeholder="Password" required />
+
+          <button type="submit" class="btn-auth">Login</button>
+        </form>
+        <p>Don't have an account? <a href="{% url 'signup' %}">Sign up</a></p>
+      </div>
+    </div>
+  </body>
+</html>

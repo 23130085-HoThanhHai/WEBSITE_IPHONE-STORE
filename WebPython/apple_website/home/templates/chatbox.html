@@ -1,0 +1,83 @@
+<!-- Chatbox AI-->
+<div id="chat-widget">
+  <!-- Chat Icon -->
+  <div id="chat-icon">💬</div>
+
+  <!-- Chat Box -->
+  <div id="chat-box">
+    <div id="chat-header">
+      <span>Tư vấn AI</span>
+      <button id="close-chat">✕</button>
+    </div>
+
+    <div id="chat-messages">
+      <div class="bot-message">Xin chào! Tôi có thể giúp gì cho bạn?</div>
+    </div>
+
+    <div id="chat-input-area">
+      <input type="text" id="chat-input" placeholder="Nhập tin nhắn..." />
+      <button id="send-btn">Gửi</button>
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatIcon = document.getElementById('chat-icon');
+    const chatBox = document.getElementById('chat-box');
+    const closeChat = document.getElementById('close-chat');
+    const sendBtn = document.getElementById('send-btn');
+    const chatInput = document.getElementById('chat-input');
+    const chatMessages = document.getElementById('chat-messages');
+
+    chatIcon.addEventListener('click', () => {
+        chatBox.style.display = 'flex';
+        chatIcon.style.display = 'none';
+    });
+
+    closeChat.addEventListener('click', () => {
+        chatBox.style.display = 'none';
+        chatIcon.style.display = 'flex';
+    });
+    function appendMessage(text, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = sender === 'user' ? 'user-message' : 'bot-message';
+        msgDiv.innerText = text;
+        chatMessages.appendChild(msgDiv);
+    
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    async function sendMessage() {
+        const message = chatInput.value.trim();
+        if (!message) return;
+        appendMessage(message, 'user');
+        chatInput.value = '';
+        appendMessage("Đang suy nghĩ...", 'bot');
+        const loadingMsg = chatMessages.lastElementChild;
+
+        try {
+            const response = await fetch('/api/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                loadingMsg.innerText = data.response;
+            } else {
+                loadingMsg.innerText = "Dạ, em đang bận chút. Anh/Chị thử lại sau nhé!";
+            }
+        } catch (error) {
+            loadingMsg.innerText = "Lỗi kết nối máy chủ rồi ạ!";
+            console.error(error);
+        }
+    }
+    sendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+});
+</script>

@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apple-shops-news</title>
+
+    <!-- google font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- style -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <!-- icon -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <!-- navbar -->
+    {% include 'navbar.html' %}
+
+    <!-- News Section -->
+    <section class="news-section">
+    <h1 class="heading-title">Tin Tức &amp; Cập Nhật</h1>
+
+    <div class="news-wrapper">
+        {% for item in news_items %}
+        <div class="news-card {% if item.is_store_info %}store-info{% endif %}">
+            {% if item.image %}
+            <img src="{{ item.image.url }}" alt="{{ item.title }}" />
+            {% endif %}
+
+            <div class="news-detail">
+                <h3>{{ item.title }}</h3>
+                <p>
+                    Ngày: {{ item.published_date|date:"d/m/Y" }}
+                    {% if item.source %}
+                    | Nguồn: {{ item.source }}
+                    {% endif %}
+                </p>
+                <p>{{ item.summary }}</p>
+                
+                {% if item.external_link %}
+                <a href="{{ item.external_link }}" target="_blank">Đọc thêm →</a>
+                {% else %}
+                <a href="{% url 'index' %}">Tìm hiểu thêm →</a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p>Hiện chưa có tin tức nào được cập nhật.</p>
+        {% endfor %}
+    </div>
+</section>
+
+    <!--footer-->
+    {% include 'footer.html' %}
+
+    <!-- Chatbox AI-->
+    {% include 'chatbox.html' %}
+
+    <script src="{% static 'js/app.js' %}"></script>
+  </body>
+</html>

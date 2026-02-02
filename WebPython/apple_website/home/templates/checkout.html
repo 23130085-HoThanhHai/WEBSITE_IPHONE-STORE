@@ -1,0 +1,167 @@
+{% load static humanize %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apple-shops-checkout</title>
+
+    <!-- google font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- style -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <!-- icon -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <!-- navbar -->
+    {% include 'navbar.html' %}
+
+    <!-- Checkout Section -->
+    <section class="checkout-section">
+        <h1 class="heading-title">
+            {% if show_history_only %} Lịch sử đơn hàng {% else %} Checkout & Order History {% endif %}
+        </h1>
+
+        {% if not show_history_only %}
+        <div class="checkout-box current-order">
+            <h2>Current Order (Giỏ hàng hiện tại)</h2>
+
+            {% if cart.items.all %}
+                {% csrf_token %} 
+                <div class="order-item">
+                    <p><strong>Ngày tạo:</strong> {% now "d/m/Y" %}</p>
+
+                    <ul class="order-products">
+                        {% for item in cart.items.all %}
+                        <li>
+                            {{ item.product.name }} ({{ item.variant.storage }}/{{ item.variant.color }}) × {{ item.quantity }}
+                            <span>{{ item.get_cost|intcomma }} VNĐ</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="coupon-box" style="margin: 20px 0; padding: 15px; background: #f5f5f7; border-radius: 12px;">
+                        <label for="coupon-input" style="display: block; margin-bottom: 8px; font-weight: 500;">Mã giảm giá cá nhân:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="coupon-input" placeholder="Dán mã từ thông báo vào đây..." 
+                                  style="flex: 1; padding: 10px; border: 1px solid #d2d2d7; border-radius: 8px; outline: none;">
+                            <button type="button" id="apply-coupon-btn" 
+                                    style="padding: 10px 20px; background: #0071e3; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                                Áp dụng
+                            </button>
+                        </div>
+                        <p id="coupon-message" style="margin-top: 8px; font-size: 0.85rem; display: none;"></p>
+                    </div>
+
+                    <div class="order-summary-details" style="border-top: 1px solid #ddd; padding-top: 15px;">
+                        <p style="display: flex; justify-content: space-between;">
+                            <span>Tạm tính:</span>
+                            <span>{{ base_amount|intcomma }} VNĐ</span>
+                        </p>
+
+                        {% if coupon_discount > 0 %}
+                        <p style="display: flex; justify-content: space-between; color: #ff3b30;">
+                            <span>Mã giảm giá cá nhân:</span>
+                            <span>- {{ coupon_discount|intcomma }} VNĐ</span>
+                        </p>
+                        {% endif %}
+
+                        {% if auto_discount > 0 %}
+                        <p style="display: flex; justify-content: space-between; color: #34c759;">
+                            <span>{{ auto_msg }}:</span>
+                            <span>- {{ auto_discount|intcomma }} VNĐ</span>
+                        </p>
+                        {% endif %}
+
+                        <p class="total" style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; margin-top: 10px; border-top: 2px solid #000;">
+                            <strong>Tổng thanh toán:</strong>
+                            <span id="final-total" style="color: #0071e3;">{{ total_amount|intcomma }} VNĐ</span>
+                        </p>
+                    </div>
+
+                    <a href="{% url 'payment' %}" class="checkout-btn" style="display: inline-block; text-align: center;">
+                        Xác nhận thông tin & Chọn phương thức thanh toán
+                    </a>
+                </div>
+            {% else %}
+            <p style="padding: 20px;">Giỏ hàng của bạn đang trống. <a href="{% url 'index' %}">Mua sắm ngay</a></p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="checkout-box previous-orders">
+            <h2>Order History</h2>
+            {% for order in previous_orders %}
+            <div class="order-item">
+                <p><strong>Order ID:</strong> #{{ order.order_id }}</p>
+                <p><strong>Date:</strong> {{ order.created_at|date:"d/m/Y" }}</p>
+                <p class="total"><strong>Total:</strong> {{ order.total_price|intcomma }} VNĐ</p>
+                <p><span class="status-tag" style="color: green;">● Đã hoàn thành</span></p>
+            </div>
+            {% empty %}
+            <p style="padding: 20px;">Bạn chưa có đơn hàng cũ nào.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!--footer-->
+      {% include 'footer.html' %}
+
+    <!-- Chatbox AI-->
+    {% include 'chatbox.html' %}
+    <script src="{% static 'js/app.js' %}"></script>
+
+<script>
+$(document).ready(function() {
+    $('#apply-coupon-btn').click(function() {
+        let code = $('#coupon-input').val();
+        let btn = $(this);
+        let msg = $('#coupon-message');
+
+        if (!code) {
+            alert("Vui lòng nhập mã!");
+            return;
+        }
+
+        btn.prop('disabled', true).text('Đang kiểm tra...');
+
+        $.ajax({
+            url: "{% url 'apply_coupon' %}", // Bạn cần khai báo url này trong urls.py
+            method: "POST",
+            data: {
+                'code': code,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    msg.css('color', '#34c759').text(response.message).show();
+                    // Cập nhật số tiền hiển thị (định dạng lại dấu phẩy)
+                    $('#final-total').text(response.new_total.toLocaleString('vi-VN'));
+                    $('#coupon-input').prop('readonly', true);
+                    btn.hide();
+                } else {
+                    msg.css('color', '#ff3b30').text(response.message).show();
+                    btn.prop('disabled', false).text('Áp dụng');
+                }
+            },
+            error: function() {
+                alert("Có lỗi xảy ra, vui lòng thử lại!");
+                btn.prop('disabled', false).text('Áp dụng');
+            }
+        });
+    });
+});
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </body>
+</html>

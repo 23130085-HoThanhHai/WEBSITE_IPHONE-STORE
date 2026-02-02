@@ -1,0 +1,260 @@
+{% load static humanize custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apple-shops-cart</title>
+
+    <!-- google font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- style -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <!-- icon -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    {% include 'navbar.html' %}
+
+    <!-- Cart Section -->
+    <section class="product" id="cart">
+      <h1 class="heading-title">Your Shopping Cart</h1>
+
+      <div class="cart-wrapper">
+        {% for item in cart.items.all %}
+        <div class="cart-item" data-item-id="{{ item.id }}">
+            <div class ="product_main">
+                <div class="product-image">
+                <img src="{{ item.variant.image.url }}" alt="{{ item.product.name }}" />
+                </div>
+                <div class="product-detail">
+                    <h4>{{ item.product.name }} ({{ item.variant.storage }}/{{ item.variant.color }})</h4>
+                        <span class="price" data-unit-price="{{ item.variant.final_price }}">
+                            {{ item.variant.final_price|floatformat:0|intcomma }} VNĐ
+                        </span>
+            
+                <div class="quantity-control">
+              <button class="qty-btn update-qty" data-action="minus">-</button>
+              <input type="text" value="{{ item.quantity }}" class="qty-input" readonly />
+              <button class="qty-btn update-qty" data-action="plus">+</button>
+              
+            </div>
+            
+            <p class="subtotal">
+                Tạm tính: <strong class="item-total">{{ item.get_cost|floatformat:0|intcomma }} VNĐ</strong>
+            </p>
+            <a href="#" class="remove-item delete-cart-item" data-item-id="{{ item.id }}" style="color: #ff3b30; font-size: 0.8rem;">Xóa sản phẩm</a>
+          </div>
+            </div>
+          
+        </div>
+        {% empty %}
+        <div class="empty-cart-message">
+            <p>Giỏ hàng của bạn đang trống.</p>
+            <a href="{% url 'index' %}" style="color: #0071e3;">Tiếp tục mua sắm</a>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if cart.items.all %}
+      <div class="upsell-container" style="padding: 20px; background: #fff; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e5e5e5;">
+          <p id="upsell-text" style="font-weight: 500; margin-bottom: 10px; color: #1d1d1f;"></p>
+          <div style="width: 100%; height: 8px; background: #f5f5f7; border-radius: 4px; overflow: hidden;">
+              <div id="upsell-bar" style="width: 0%; height: 100%; background: #34c759; transition: width 0.3s ease;"></div>
+          </div>
+      </div>
+      <div class="cart-summary">
+        <h3>Tổng cộng</h3>
+        <p>Tạm tính: <strong id="cart-total">{{ cart.get_total_price|floatformat:0|intcomma }} VNĐ</strong></p>
+        <div style="display:flex; gap:8px; justify-content:flex-end; align-items:center;">
+          <button id="clear-cart-btn" class="checkout-btn" style="background:#fff; color:#d9534f; border:1px solid #f0dede;">Xóa tất cả</button>
+          <a href="{% url 'checkout' %}" class="swiper-btn checkout-btn checkout-link">Thanh toán</a>
+        </div>
+      </div>
+      {% endif %}
+    </section>
+
+    <!--footer-->
+    {% include 'footer.html' %}
+
+    <!-- Chatbox AI-->
+    {% include 'chatbox.html' %}
+
+    <script>
+      $(document).ready(function() {
+
+        // Hàm chuyển đổi chuỗi "1.000.000 VNĐ" thành số 1000000
+        function parsePrice(priceString) {
+            if (typeof priceString !== 'string') return priceString;
+            return parseInt(priceString.replace(/[^\d]/g, '')) || 0;
+        }
+
+        // CHẠY LẦN ĐẦU KHI TRANG LOAD
+        let initialTotal = parsePrice($('#cart-total').text());
+        updateUpsell(initialTotal);
+          // 1. XỬ LÝ TĂNG GIẢM SỐ LƯỢNG
+          $('.update-qty').off('click').on('click', function(e) {
+              e.preventDefault();
+              let btn = $(this);
+              let itemContainer = btn.closest('.cart-item');
+              let itemId = itemContainer.data('item-id');
+              let action = btn.data('action');
+
+              $.ajax({
+                  url: "{% url 'update_cart_item' %}",
+                  method: "POST",
+                  data: {
+                      'item_id': itemId,
+                      'action': action,
+                      'csrfmiddlewaretoken': '{{ csrf_token }}'
+                  },
+                  success: function(response) {
+                      // Cập nhật giá trị ngay lập tức trên màn hình
+                      itemContainer.find('.qty-input').val(response.new_quantity);
+                      itemContainer.find('.item-total').text(response.item_total);
+                      $('#cart-total').text(response.cart_total);
+                      // CẬP NHẬT THANH TIẾN TRÌNH
+                      updateUpsell(parsePrice(response.cart_total));
+                  },
+                  error: function(xhr, status, error) {
+                      console.log(xhr.status + ": " + xhr.responseText);
+                      alert('Có lỗi xảy ra tại Server. Nhấn F12 và xem tab Console nhé!');
+                  }
+              });
+          });
+
+          // 2. XỬ LÝ XÓA SẢN PHẨM BẰNG AJAX
+          $('.delete-cart-item').on('click', function(e) {
+              e.preventDefault();
+              if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return;
+
+              let btn = $(this);
+              let itemContainer = btn.closest('.cart-item');
+              let itemId = btn.data('item-id');
+
+              $.ajax({
+                  url: "/cart/remove/" + itemId + "/", // Phải khớp với URL name='remove_cart_item'
+                  method: "POST",
+                  data: {
+                      'csrfmiddlewaretoken': '{{ csrf_token }}'
+                  },
+                  success: function(response) {
+                      // Hiệu ứng biến mất dần rồi xóa khỏi giao diện
+                      itemContainer.fadeOut(300, function() {
+                          $(this).remove();
+                          // Cập nhật lại tổng tiền giỏ hàng từ response (nếu view có trả về)
+                          if(response.cart_total) {
+                              $('#cart-total').text(response.cart_total);
+                              // CẬP NHẬT THANH TIẾN TRÌNH
+                              updateUpsell(parsePrice(response.cart_total));
+                          } else {
+                              location.reload(); // Nếu chưa viết view trả về total thì reload tạm
+                          }
+                          
+                          // Nếu không còn sản phẩm nào thì hiện thông báo trống
+                          if ($('.cart-item').length === 0) {
+                              $('.cart-wrapper').html('<div class="empty-cart-message" style="text-align: center; padding: 50px;"><p>Giỏ hàng của bạn đang trống.</p><a href="/" style="color: #0071e3;">Tiếp tục mua sắm</a></div>');
+                              $('.cart-summary').remove();
+                          }
+                      });
+                  }
+              });
+          });
+
+                // 3. XỬ LÝ THÊM / BỎ PHỤ KIỆN KHI CHECKBOX THAY ĐỔI (binding at document ready)
+                $('.toggle-accessory').off('change').on('change', function(e) {
+                  let chk = $(this);
+                  let variantId = chk.data('variant-id');
+                  let checked = chk.is(':checked');
+
+                  $.ajax({
+                    url: "{% url 'toggle_accessory' %}",
+                    method: "POST",
+                    data: {
+                      'variant_id': variantId,
+                      'checked': checked,
+                      'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                      if (response.cart_total) {
+                        $('#cart-total').text(response.cart_total);
+                        // CẬP NHẬT THANH TIẾN TRÌNH
+                        updateUpsell(parsePrice(response.cart_total));
+                      }
+                    },
+                    error: function(xhr) {
+                      console.error('Accessory toggle error', xhr);
+                      alert('Có lỗi khi xử lý phụ kiện. Vui lòng thử lại.');
+                      // revert checkbox state on error
+                      chk.prop('checked', !checked);
+                    }
+                  });
+                });
+
+                // Clear cart button (bind on document ready)
+                $('#clear-cart-btn').off('click').on('click', function(e) {
+                  e.preventDefault();
+                  if (!confirm('Bạn có chắc chắn muốn xóa toàn bộ sản phẩm trong giỏ hàng?')) return;
+                  $.ajax({
+                    url: "{% url 'clear_cart' %}",
+                    method: "POST",
+                    data: {'csrfmiddlewaretoken': '{{ csrf_token }}'},
+                    success: function(response) {
+                      if (response.status === 'success') {
+                        // simple reload to reflect empty cart
+                        location.reload();
+                      }
+                    },
+                    error: function(xhr) {
+                      alert('Có lỗi xảy ra khi xóa giỏ hàng. Vui lòng thử lại.');
+                    }
+                  });
+                });
+      });
+
+      // GIỮ NGUYÊN HÀM NÀY PHÍA DƯỚI
+    function updateUpsell(currentTotal) {
+        const TIERS = [
+            { threshold: 5000000, discount: 50000 },
+            { threshold: 10000000, discount: 100000 },
+            { threshold: 20000000, discount: 200000 },
+            { threshold: 30000000, discount: 500000 }
+        ];
+
+        let text = "";
+        let progress = 0;
+        let nextTier = TIERS.find(t => currentTotal < t.threshold);
+
+        if (nextTier) {
+            let needed = nextTier.threshold - currentTotal;
+            text = `Mua thêm <b>${needed.toLocaleString('vi-VN')} VNĐ</b> để được giảm ngay <b>${nextTier.discount.toLocaleString('vi-VN')} VNĐ</b>`;
+            
+            let prevThreshold = 0;
+            let index = TIERS.indexOf(nextTier);
+            if (index > 0) prevThreshold = TIERS[index-1].threshold;
+            
+            progress = ((currentTotal - prevThreshold) / (nextTier.threshold - prevThreshold)) * 100;
+        } else {
+            text = "🎉 Tuyệt vời! Bạn đã đạt mức giảm giá cao nhất (500.000 VNĐ)";
+            progress = 100;
+        }
+
+        $('#upsell-text').html(text);
+        $('#upsell-bar').css('width', progress + '%');
+    }
+</script>
+
+<script src="{% static 'js/app.js' %}"></script>
+</script>
+  </body>
+</html>

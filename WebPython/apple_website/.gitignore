@@ -1,0 +1,15 @@
+key.env
+db.sqlite3
+__pycache__/
+*.pyc
+.env
+media/
+.idea
+
+venv/
+.venv/
+key.env
+apple_website/home/ml_models/phobert_sentiment/
+home/ml_models/
+*.bin
+

@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán VNPay QR</title>
+    <link rel="stylesheet" href="{% static 'css/../../static/vnpay_static/css/payment_qr.css' %}">
+</head>
+<body>
+    <div class="payment-container">
+        <div class="header">
+            <img src="{% static 'images/vnpay_logo/img.png' %}" alt="VNPay Logo">
+        </div>
+
+        {% load humanize %}<div class="order-info">
+            <p>Mã đơn hàng: <strong>#{{ order_id }}</strong></p>
+            <p>Số tiền cần thanh toán:</p>
+            <div class="amount">{{ amount|intcomma }} VND</div>
+        </div>
+
+        <div class="instruction">
+            Mở ứng dụng <strong>Ngân hàng</strong> hoặc <strong>Ví VNPay</strong> <br> Quét mã QR để thanh toán
+        </div>
+
+        <div class="qr-wrapper">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="VNPay QR Code">
+        </div>
+
+        <a href="{{ payment_url }}" class="btn-mobile">
+            Thanh toán qua App VNPay
+        </a>
+
+        <div class="footer-note">
+            <span class="loading-dots">Đang chờ xác nhận thanh toán</span>
+            <p>Vui lòng không thoát hoặc tải lại trang.</p>
+        </div>
+    </div>
+</body>
+</html>

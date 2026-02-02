@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apple-shops-Contact</title>
+
+    <!-- Google font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    {% include 'navbar.html' %}
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact">
+      <h1 class="heading-title">Liên hệ với Apple Shops</h1>
+
+      <div class="contact-wrapper">
+        <!-- Contact Info -->
+        <div class="contact-info">
+          <h3>Thông tin cửa hàng</h3>
+          <p>
+            <i class="fas fa-map-marker-alt"></i> 123 Nguyễn Ái Quốc, Biên Hòa,
+            Việt Nam
+          </p>
+          <p><i class="fas fa-phone"></i> +84 912 345 678</p>
+          <p><i class="fas fa-envelope"></i> support@appleshops.vn</p>
+          <p><i class="fas fa-clock"></i> Giờ mở cửa: 8:00 - 21:00 (T2 - CN)</p>
+
+          <div class="social-links">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="contact-form">
+          <h3>Gửi tin nhắn cho chúng tôi</h3>
+          
+          {% if messages %}
+            {% for message in messages %}
+              <p style="color: green;">{{ message }}</p>
+            {% endfor %}
+          {% endif %}
+
+          <form action="{% url 'contact' %}" method="post">
+            {% csrf_token %}
+            <input type="text" name="full_name" placeholder="Họ và tên" required />
+            <input type="email" name="email" placeholder="Email" required />
+            <input type="text" name="phone" placeholder="Số điện thoại" />
+            <textarea
+              name="message"
+              rows="5"
+              placeholder="Nội dung tin nhắn"
+              required
+            ></textarea>
+            <button type="submit" class="btn-send">Gửi tin nhắn</button>
+          </form>
+        </div>
+
+      <!-- Map -->
+      <div class="contact-map">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.195706141865!2d106.8146656747869!3d10.797249858841695!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3174d93a56cf34a5%3A0x3852990042a76915!2sApple%20Store!5e0!3m2!1svi!2s!4v1698910277082!5m2!1svi!2s"
+          width="100%"
+          height="350"
+          style="border: 0; border-radius: 12px; margin-top: 40px"
+          allowfullscreen=""
+          loading="lazy"
+        ></iframe>
+      </div>
+    </section>
+
+    <!--footer-->
+    {% include 'footer.html' %}
+
+    <!-- Chatbox AI-->
+    {% include 'chatbox.html' %}
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const checkoutBtn = document.querySelector(".btn-send");
+        if (checkoutBtn) {
+          checkoutBtn.addEventListener("click", function () {
+            // Chuyển đến trang checkout.html
+            window.location.href = "{% url 'response' %}";
+          });
+        }
+      });
+    </script>
+
+    <script src="{% static 'js/app.js' %}"></script>
+  </body>
+</html>

@@ -1,0 +1,90 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block content %}
+
+</div>
+    <div style="width: 100%; background: #f8f9fa; padding: 20px; border: 1px solid #ddd; margin-bottom: 20px; border-radius: 8px;">
+    <h2 style="margin-top: 0;color: red;" >Báo cáo doanh thu tùy chỉnh</h2>
+
+    <form id="filterForm" method="get" style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap;">
+        <div>
+            <label style="color: red;">Chế độ xem:</label><br>
+            <select name="view_type" id="view_type" onchange="toggleInputs()" style="padding: 5px;">
+                <option value="day" {% if current_view_type == 'day' %}selected{% endif %}>Theo Ngày (Khoảng)</option>
+                <option value="month" {% if current_view_type == 'month' %}selected{% endif %}>Theo Tháng (Trong năm)</option>
+                <option value="quarter" {% if current_view_type == 'quarter' %}selected{% endif %}>Theo Quý (Trong năm)</option>
+                <option value="year" {% if current_view_type == 'year' %}selected{% endif %}>Theo Năm</option>
+            </select>
+        </div>
+
+        <div id="year_input">
+            <label style="color: red;">Chọn năm:</label><br>
+            <input type="number" name="year_filter" value="2025" style="padding: 4px; width: 80px;">
+        </div>
+
+        <div id="date_range_input" style="display: none;">
+           <label style="color: red;">Từ ngày - Đến ngày:</label><br>
+            <input type="date" name="start_date" style="padding: 4px;">
+            <input type="date" name="end_date" style="padding: 4px;">
+        </div>
+
+        <button type="submit" style="background: #417690; color: white; border: none; padding: 6px 15px; cursor: pointer; border-radius: 4px;">Áp dụng bộ lọc</button>
+    </form>
+
+    <div style="height: 350px;">
+        <canvas id="flexChart"></canvas>
+
+    </div>
+</div>
+
+{{ block.super }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+    // Logic ẩn hiện input dựa trên chế độ xem
+    function toggleInputs() {
+        const type = document.getElementById('view_type').value;
+        document.getElementById('year_input').style.display = (type === 'month' || type === 'quarter') ? 'block' : 'none';
+        document.getElementById('date_range_input').style.display = (type === 'day') ? 'block' : 'none';
+    }
+
+    // Gọi khi load trang
+    window.addEventListener('DOMContentLoaded', (event) => {
+        toggleInputs();
+
+        // Lấy dữ liệu an toàn, nếu không có thì trả về mảng rỗng
+        const fLabels = JSON.parse('{{ flex_labels|safe }}' || '[]');
+        const fValues = JSON.parse('{{ flex_values|safe }}' || '[]');
+
+        const ctxFlex = document.getElementById('flexChart').getContext('2d');
+        new Chart(ctxFlex, {
+            type: 'bar',
+            data: {
+                labels: fLabels,
+                datasets: [{
+                    label: 'Doanh thu (VNĐ)',
+                    data: fValues,
+                    backgroundColor: '#417690',
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' đ';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

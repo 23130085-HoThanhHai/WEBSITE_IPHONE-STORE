@@ -1,0 +1,413 @@
+{% load static %}
+
+<style>
+  /* Container chứa icon chuông */
+.notification-menu {
+    position: relative;
+    display: inline-block;
+}
+
+/* Badge số thông báo */
+.badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #ff3b30; /* Màu đỏ Apple */
+    color: white;
+    border-radius: 50%;
+    padding: 2px 5px;
+    font-size: 10px;
+    font-weight: bold;
+    border: 2px solid #fff; /* Tạo viền trắng xung quanh badge cho nổi bật */
+}
+
+/* Submenu thông báo */
+.notification-submenu {
+    position: absolute;
+    top: 100%;
+    margin-top: 8px;
+
+    right: 0;
+    transform: translateX(-70%);
+    width: 320px;
+
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(15px);
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    padding: 15px 0;
+
+    display: none;
+    z-index: 1000;
+}
+
+/* Class dùng cho JS */
+.notification-submenu.show {
+    display: block;
+}
+
+
+.notification-submenu h4 {
+    padding: 0 15px 10px;
+    margin: 0;
+    font-size: 1.1rem;
+    color: #1d1d1f;
+}
+
+.notification-submenu hr {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 0;
+}
+
+/* Từng mục thông báo */
+.notif-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 15px;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.notif-item:hover {
+    background: #f5f5f7;
+}
+
+.notif-item i {
+    margin-top: 3px;
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.notif-item .notif-content {
+    flex: 1;
+}
+
+.notif-item p {
+    font-size: 0.9rem;
+    color: #333;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.notif-item small {
+    display: block;
+    color: #86868b;
+    font-size: 0.75rem;
+    margin-top: 4px;
+}
+
+/* Hiệu ứng mũi tên nhọn trên đầu submenu */
+.notification-submenu::before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    right: 15px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #fff;
+}
+</style>
+
+<nav>
+  <h2 class="logo">Apple Shops</h2>
+
+  <div class="menu-list">
+    <a href="{% url 'index' %}">Home</a>
+
+    <a href="{% url 'iphone' %}">Iphone</a>
+
+    <a href="{% url 'ipad' %}">Ipad</a>
+
+    <a href="{% url 'macbook' %}">Macbook</a>
+
+    <a href="{% url 'phukien' %}">Accessory</a>
+
+    <a href="{% url 'new' %}">News</a>
+
+    <a href="{% url 'contact' %}">Contact</a>
+  </div>
+
+  <div class="menu-right">
+    <div class="search-container">
+        <form action="{% url 'search' %}" method="get" class="search-form">
+            <input type="text" name="q" placeholder="Tìm kiếm sản phẩm..." class="search-input" autocomplete="off">
+            <button type="submit" class="btn btn-menu">
+                <i class="fas fa-search"></i>
+            </button>
+            <div id="search-results" class="search-suggestions-box"></div>
+        </form>
+    </div>
+
+    <div class="menu-item user-menu">
+      <button class="btn btn-menu">
+        <i class="fas fa-user"></i>
+      </button>
+      
+      <div class="submenu user-submenu">
+        {% if user.is_authenticated %}
+          <p class="user-name">Chào, {{ user.first_name|default:user.username }}</p>
+          <hr>
+          <a href="{% url 'checkout' %}?show_history=1">Đơn hàng của tôi</a>
+          {% if user.is_staff %}
+            <a href="/admin/" target="_blank" style="color: #ff3b30;">Quản trị hệ thống</a>
+          {% endif %}
+          <a href="{% url 'logout' %}" class="logout-link">Đăng xuất</a>
+        {% else %}
+          <a href="{% url 'login' %}">Đăng nhập</a>
+          <a href="{% url 'signup' %}">Đăng ký</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="menu-item notification-menu">
+        <button class="btn btn-menu" id="notifBtn">
+            <i class="fas fa-bell"></i>
+            {% if total_notif > 0 %}
+                <span class="badge">{{ total_notif }}</span>
+            {% endif %}
+        </button>
+
+        
+        <div class="submenu notification-submenu" id="notifSubmenu">
+            <h4>Thông báo</h4>
+            <hr>
+            
+            {% for msg in admin_notif %}
+            <div class="notif-item" onclick="openAdminModal('{{ msg.admin_reply|escapejs }}')">
+                <i class="fas fa-comment-dots" style="color: #007aff;"></i>
+                <div class="notif-content">
+                    <p>Admin đã phản hồi tin nhắn của bạn</p>
+                    <small>{{ msg.created_at|date:"d/m H:i" }}</small>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% for order in order_notif %}
+            <div class="notif-item" onclick="openOrderModal('{{ order.order_id }}')">
+                <i class="fas fa-check-circle" style="color: #34c759;"></i>
+                <div class="notif-content">
+                    <p>Đơn hàng <strong>#{{ order.order_id }}</strong> đã thanh toán thành công</p>
+                    <small>{{ order.created_at|date:"d/m H:i" }}</small>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% for coupon in coupons %}
+            <div class="notif-item" onclick="openCouponModal('{{ coupon.code }}', '{{ coupon.discount_amount }}')" style="background: #fff9f0;">
+                <i class="fas fa-ticket-alt" style="color: #ff9500;"></i>
+                <div class="notif-content">
+                    <p>Tặng bạn mã: <strong style="color: #d70018;">{{ coupon.code }}</strong></p>
+                    <small>Giảm ngay {{ coupon.discount_amount|floatformat:0 }} VNĐ</small>
+                </div>
+            </div>
+            {% endfor %}
+            {% if not admin_notif and not order_notif and not coupons %}
+                <p style="padding: 20px; text-align: center; color: #86868b; font-size: 0.9rem;">Không có thông báo mới</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="cart">
+      <a href="{% url 'cart' %}" class="btn btn-menu">
+        <i class="fas fa-shopping-cart"></i>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div id="notifModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div id="modalBody">
+        </div>
+  </div>
+</div>
+
+<style>
+/* Badge số đỏ trên icon */
+.notification-menu { position: relative; }
+.badge {
+    position: absolute; top: -5px; right: -5px;
+    background: red; color: white; border-radius: 50%;
+    padding: 2px 6px; font-size: 10px;
+}
+.notification-submenu { width: 300px; max-height: 400px; overflow-y: auto; }
+.notif-item { 
+    padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.3s;
+}
+.notif-item:hover { background: #f9f9f9; }
+.notif-item p { font-size: 0.9rem; margin: 0; }
+
+/* Modal cơ bản */
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+.modal-content { background: white; margin: 15% auto; padding: 20px; width: 40%; border-radius: 10px; }
+.close { float: right; cursor: pointer; font-size: 24px; }
+</style>
+
+<script>
+  document.querySelector('.search-input').addEventListener('input', function() {
+    let query = this.value;
+    let resultsBox = document.getElementById('search-results');
+
+    if (query.length > 1) {
+        fetch(`/search-suggestions/?q=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                resultsBox.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(item => {
+                        let div = document.createElement('div');
+                        div.classList.add('suggestion-item');
+                        div.innerHTML = item.name;
+                        div.onclick = function() {
+                            window.location.href = `/product_detail/${item.slug}/`;
+                        };
+                        resultsBox.appendChild(div);
+                    });
+                    resultsBox.style.display = 'block';
+                } else {
+                    resultsBox.style.display = 'none';
+                }
+            });
+    } else {
+        resultsBox.style.display = 'none';
+    }
+});
+
+// Đóng hộp gợi ý khi click ra ngoài
+document.addEventListener('click', function(e) {
+    if (!document.querySelector('.search-container').contains(e.target)) {
+        document.getElementById('search-results').style.display = 'none';
+    }
+});
+</script>
+
+<script>
+// Hàm mở Modal cho phản hồi của Admin
+function openAdminModal(replyText) {
+    const modal = document.getElementById('notifModal');
+    const modalBody = document.getElementById('modalBody');
+    
+    modalBody.innerHTML = `
+        <h3>Phản hồi từ Admin</h3>
+        <hr>
+        <p style="margin-top:15px; line-height:1.6;">${replyText}</p>
+    `;
+    modal.style.display = "block";
+}
+
+// Hàm mở Modal cho thông báo đơn hàng (Sử dụng AJAX để lấy chi tiết)
+function openOrderModal(orderId) {
+    const modal = document.getElementById('notifModal');
+    const modalBody = document.getElementById('modalBody');
+    
+    // Hiển thị trạng thái đang tải
+    modalBody.innerHTML = `<p>Đang tải chi tiết đơn hàng #${orderId}...</p>`;
+    modal.style.display = "block";
+
+    // Gọi API bạn đã viết ở urls.py (get_order_details)
+    fetch(`/get_order_details/${orderId}/`)
+        .then(response => response.json())
+        .then(data => {
+            let itemsHtml = data.items.map(item => 
+                `<li>${item.name} x ${item.qty}: ${item.price} VNĐ</li>`
+            ).join('');
+
+            modalBody.innerHTML = `
+                <h3>Chi tiết đơn hàng #${data.order_id}</h3>
+                <hr>
+                <p><strong>Trạng thái:</strong> <span style="color:green;">Thanh toán thành công</span></p>
+                <p><strong>Sản phẩm đã mua:</strong></p>
+                <ul>${itemsHtml}</ul>
+                <h4 style="text-align:right;">Tổng tiền: ${data.total} VNĐ</h4>
+            `;
+        })
+        .catch(error => {
+            modalBody.innerHTML = `<p style="color:red;">Lỗi khi tải dữ liệu đơn hàng.</p>`;
+        });
+}
+
+// Hàm đóng Modal
+function closeModal() {
+    document.getElementById('notifModal').style.display = "none";
+}
+
+function openCouponModal(code, amount) {
+    const modal = document.getElementById('notifModal');
+    const modalBody = document.getElementById('modalBody');
+    
+    modalBody.innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+            <i class="fas fa-gift" style="font-size: 3.5rem; color: #ff416c; margin-bottom: 15px;"></i>
+            <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Quà tặng đặc biệt!</h3>
+            <p style="color: #424245;">Bạn nhận được ưu đãi giảm giá riêng:</p>
+            
+            <div style="position: relative; background: #f5f5f7; border: 2px dashed #d2d2d7; padding: 20px; font-size: 1.8rem; font-weight: bold; margin: 20px 0; color: #1d1d1f; border-radius: 12px; letter-spacing: 2px;">
+                <span id="couponCodeText">${code}</span>
+                <button onclick="copyToClipboard('${code}')" style="display: block; margin: 10px auto 0; padding: 5px 15px; font-size: 0.9rem; background: #0071e3; color: white; border: none; border-radius: 20px; cursor: pointer; transition: 0.3s;">
+                    <i class="fas fa-copy"></i> Sao chép mã
+                </button>
+            </div>
+
+            <p style="color: #1d1d1f; font-size: 1.1rem;">Giảm ngay <strong>${Number(amount).toLocaleString('vi-VN')} VNĐ</strong></p>
+            <p id="copySuccess" style="color: #34c759; font-size: 0.85rem; margin-top: 10px; display: none;">
+                <i class="fas fa-check"></i> Đã sao chép vào bộ nhớ tạm!
+            </p>
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+            <small style="color: #86868b; display: block;">* Áp dụng cho đơn hàng tiếp theo của bạn.</small>
+        </div>
+    `;
+    modal.style.display = "block";
+}
+
+// Hàm xử lý việc Copy
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        const msg = document.getElementById('copySuccess');
+        msg.style.display = 'block';
+        // Tự động ẩn thông báo sau 3 giây
+        setTimeout(() => {
+            msg.style.display = 'none';
+        }, 3000);
+    }, function(err) {
+        console.error('Không thể sao chép: ', err);
+    });
+}
+
+// Đóng modal khi nhấn ra ngoài vùng trắng
+window.onclick = function(event) {
+    const modal = document.getElementById('notifModal');
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const notifBtn = document.getElementById("notifBtn");
+    const notifSubmenu = document.getElementById("notifSubmenu");
+
+    // Click chuông → toggle submenu
+    notifBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        notifSubmenu.classList.toggle("show");
+    });
+
+    // Click vào submenu → không đóng
+    notifSubmenu.addEventListener("click", function (e) {
+        e.stopPropagation();
+    });
+
+    // Click ra ngoài → đóng submenu
+    document.addEventListener("click", function () {
+        notifSubmenu.classList.remove("show");
+    });
+});
+</script>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

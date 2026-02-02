@@ -1,0 +1,207 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apple-shops-home</title>
+
+    <!-- google font-->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <!--style -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <!--icon: font awesome-->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+    />
+
+    <!--swiperjs-->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css"
+    />
+  </head>
+
+  <!--Style body-->
+  <style>
+    .checkout {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .checkout h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .payment-methods {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .payment-option {
+      flex: 1;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+      position: relative;
+    }
+
+    .payment-option input[type="radio"] {
+      display: none;
+    }
+
+    .payment-option img {
+      max-width: 80px;
+      margin-bottom: 5px;
+    }
+
+    .payment-option span {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Khi chọn phương thức thanh toán */
+    .payment-option input[type="radio"]:checked + .option-box {
+      border: 2px solid #4caf50;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .payment-option:hover {
+      border-color: #4caf50;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #4caf50;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 16px;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .checkout-btn:hover {
+      background-color: #45a049;
+    }
+  </style>
+  <body>
+    <!--navbar-->
+    {% include 'navbar.html' %}
+
+    <!--payment form-->
+    <section class="checkout">
+    </br>
+    </br>
+    </br>
+  </br>
+      <h1>Thanh toán đơn hàng</h1>
+
+      <form action="" method="POST" class="checkout-form" action="{% url 'payment' %}">
+        {% csrf_token %}
+
+        <!-- Thông tin khách hàng -->
+        <div class="form-group">
+          <label>Họ và tên</label>
+          <input type="text" name="fullname" required />
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" required />
+        </div>
+
+        <div class="form-group">
+          <label>Số điện thoại</label>
+          <input type="text" name="phone" required />
+        </div>
+
+        <div class="form-group">
+          <label>Địa chỉ giao hàng</label>
+          <textarea name="address" rows="3" required></textarea>
+        </div>
+
+        <!-- Phương thức thanh toán -->
+        <h3>Phương thức thanh toán</h3>
+        <div class="payment-methods">
+          <label class="payment-option">
+            <input type="radio" name="payment" value="cod" checked />
+            <div class="option-box">
+              <img src="{% static 'images/cash.jpg' %}" alt="" />
+              <span>Thanh toán khi nhận hàng (COD)</span>
+            </div>
+          </label>
+
+          <label class="payment-option">
+            <input type="radio" name="payment" value="momo" />
+            <div class="option-box">
+              <img src="{% static 'images/momo.webp' %}" alt="" />
+              <span>Ví MoMo</span>
+            </div>
+          </label>
+
+          <label class="payment-option">
+            <input type="radio" name="payment" value="vnpay" />
+            <div class="option-box">
+              <img src="{% static 'images/vnpay.jpg' %}" alt="" />
+              <span>VNPay</span>
+            </div>
+          </label>
+        </div>
+          <input type="hidden" name="order_type" value="billpayment">
+          <input type="hidden" name="order_id" value="{{ order_id }}">
+          <input type="hidden" name="amount" value="{{ total_amount }}">
+          <input type="hidden" name="order_desc" value="Thanh toan don hang Apple Shop">
+          <input type="hidden" name="bank_code" value="">
+          <input type="hidden" name="language" value="vn">
+        <button type="submit" class="checkout-btn">Xác nhận thanh toán</button>
+      </form>
+    </section>
+
+    <!--footer-->
+    {% include 'footer.html' %}
+
+    <!-- Chatbox AI-->
+    {% include 'chatbox.html' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
+    <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.js"></script>
+    <script src="{% static 'js/app.js' %}"></script>
+  </body>
+</html>

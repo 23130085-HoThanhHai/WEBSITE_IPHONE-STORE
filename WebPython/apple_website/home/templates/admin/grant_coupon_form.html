@@ -1,0 +1,22 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<form method="POST">
+    {% csrf_token %}
+    <div>
+        <label>Mã giảm giá (Ví dụ: KM2026):</label>
+        <input type="text" name="custom_code" required>
+    </div>
+    <br>
+    <div>
+        <label>Số tiền giảm (VNĐ):</label>
+        <input type="number" name="amount" required>
+    </div>
+    <br>
+    <div>
+        <label>Mô tả:</label>
+        <input type="text" name="description" value="Quà tặng từ hệ thống">
+    </div>
+    <br>
+    <input type="submit" value="Xác nhận tặng mã ngay" style="background: #417690; color: white; padding: 10px 20px; border: none; cursor: pointer;">
+</form>
+{% endblock %}

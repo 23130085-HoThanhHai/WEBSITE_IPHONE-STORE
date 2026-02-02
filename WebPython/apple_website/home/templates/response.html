@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apple Shops - Cảm ơn bạn</title>
+
+    <!-- Google font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+    />
+
+    <style>
+      .thankyou-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        text-align: center;
+      }
+
+      .thankyou-container {
+        background: white;
+        padding: 40px 60px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .thankyou-icon {
+        font-size: 70px;
+        color: #28a745;
+        margin-bottom: 20px;
+      }
+
+      .thankyou-container h1 {
+        font-family: "Montserrat", sans-serif;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      .thankyou-container p {
+        color: #555;
+        margin-bottom: 30px;
+      }
+
+      .btn-back-home {
+        background: #000;
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: 0.3s;
+      }
+
+      .btn-back-home:hover {
+        background: #333;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Thank You Section -->
+    <section class="thankyou-section">
+      <div class="thankyou-container">
+        <i class="fas fa-check-circle thankyou-icon"></i>
+        <h1>Cảm ơn bạn đã liên hệ với Apple Shops!</h1>
+        <p>
+          Chúng tôi đã nhận được tin nhắn của bạn và sẽ phản hồi trong thời gian
+          sớm nhất.
+        </p>
+        <a href="{% url 'index' %}" class="btn-back-home">Quay về trang chủ</a>
+      </div>
+    </section>
+
+    <script src="{% static 'js/app.js' %}"></script>
+  </body>
+</html>

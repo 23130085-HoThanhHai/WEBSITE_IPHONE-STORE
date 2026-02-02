@@ -1,0 +1,493 @@
+{% load static humanize custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apple Shops - Iphone</title>
+
+    <!-- Google font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Style -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+    />
+
+    <!-- Isotope filter -->
+    <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.js"></script>
+
+    <style>
+      .product-container {
+        margin-top: 100px;
+        padding: 2rem;
+      }
+
+      .page-title {
+        font-size: 36px;
+        font-weight: 800;
+        color: #333;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      .search-box {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .search-box input {
+        width: 50%;
+        padding: 0.8rem 1rem;
+        border-radius: 20px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        outline: none;
+      }
+
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 2rem;
+        transition: all 0.3s ease;
+      }
+
+      .product-card {
+        position: relative;
+        background: var(--whiteColor);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: rgba(0, 0, 0, 0.15) 0 4px 12px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: rgba(0, 0, 0, 0.25) 0 6px 15px;
+      }
+
+      .product-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+      }
+
+      .product-detail {
+        padding: 1rem;
+        text-align: center;
+      }
+
+      .product-button {
+        width: 80%;
+        padding: 0.8rem;
+        border: none;
+        border-radius: 8px;
+        background: var(--primaryColor);
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .product-button:hover {
+        background: var(--fontColor);
+      }
+
+      /* HOVER INFO BOX */
+      .hover-info {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: rgba(255, 255, 255, 0.95);
+        width: 100%;
+        height: 100%;
+        padding: 1rem;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        line-height: 1.4rem;
+      }
+
+      .product-card:hover .hover-info {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* ================== TOAST STYLE ================== */
+      .toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background-color: #333;
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 15px;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.4s ease;
+        z-index: 9999;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* FILTER PANEL STYLE */
+      .filter-panel {
+        margin-top: 30px;
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: rgba(0, 0, 0, 0.1) 0 3px 8px;
+      }
+
+      .filter-panel h3 {
+        margin-bottom: 15px;
+        font-weight: 700;
+      }
+
+      .filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .filter-group label {
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+
+      .filter-group select {
+        padding: 8px 15px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        outline: none;
+        font-size: 1rem;
+        min-width: 180px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    {% include 'navbar.html' %}
+
+    <main class="product-container">
+      <h2 class="page-title">Iphone</h2>
+      <hr />
+
+      <!-- Ô tìm kiếm -->
+      <div class="search-box">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="🔍 Tìm kiếm sản phẩm..."
+        />
+      </div>
+
+      <!-- Bộ lọc sản phẩm -->
+      <div class="filter-bar">
+        <select id="filterSeries">
+          <option value="*">Tất cả dòng</option>
+          <option value="11">iPhone 11 Series</option>
+          <option value="13">iPhone 13 Series</option>
+          <option value="14">iPhone 14 Series</option>
+          <option value="15">iPhone 15 Series</option>
+          <option value="16">iPhone 16 Series</option>
+          <option value="17">iPhone 17 Series</option>
+        </select>
+
+        <select id="filterStatus">
+          <option value="*">Tất cả</option>
+          <option value="new">New</option>
+          <option value="bestseller">Best Seller</option>
+          <option value="promo">Promo</option>
+        </select>
+
+        <select id="filterStorage">
+          <option value="*">Dung lượng</option>
+          <option value="64">64GB</option>
+          <option value="128">128GB</option>
+          <option value="256">256GB</option>
+          <option value="512">512GB</option>
+        </select>
+
+        <select id="filterPrice">
+          <option value="*">Giá</option>
+          <option value="2">10 – 20 triệu</option>
+          <option value="3">Trên 20 triệu</option>
+        </select>
+      </div>
+
+      <div class="product-grid" id="productGrid">
+        <!-- PRODUCT CARD -->
+        {% if search_query %}
+            <div class="search-status" style="margin-bottom: 20px; padding: 0 20px;">
+              <p style="color: #86868b;">Đang hiển thị kết quả cho: <strong style="color: #1d1d1f;">"{{ search_query }}"</strong></p>
+            </div>
+        {% endif %}
+        {% for product in products %}
+          {% with product.variants.first as variant %}
+            {% if variant %}
+        <div
+          class="product-card accessory"
+          data-price="{{ variant.final_price|floatformat:0|cut:"," }}"
+          data-status="{% if product.is_new %}new{% elif product.is_bestseller %}bestseller{% else %}promo{% endif %}"
+          data-promo="{% if variant.price > variant.final_price %}promo{% endif %}"
+          data-series="{{ product.name|cut:'IPhone '|cut:' Pro Max'|cut:' Plus'|cut:' Mini' }}"
+          data-storage="{{ variant.storage|default:'' }}"
+        >
+          {% if product.is_new %}
+          <div class="product-label label-red">New</div>
+          {% elif product.is_bestseller %}
+          <div class="product-label label-blue">Best Seller</div>
+          {% elif variant.price > variant.final_price %}
+          <div class="product-label label-yellow">
+              {% if variant.discount_percent > 0 %}
+                  Sale {{ variant.discount_percent }}%
+              {% else %}
+                  Hot Deal
+              {% endif %}
+          </div>
+          {% endif %}
+
+          <img
+            class="product-image"
+            src="{{ variant.image.url|default:'#' }}"
+            alt="{{ product.name|default:'Sản phẩm' }}"
+          />
+
+          <div class="product-detail">
+            <h4>
+              {{ product.name|default:'[Tên sản phẩm]' }}<i
+                class="far fa-heart"
+              ></i>
+            </h4>
+            <div class="rating">...</div>
+            <div class="price-display">
+              {% if variant.price > variant.final_price %}
+                  <span style="text-decoration: line-through; color: #8e8e93; font-size: 0.85em;">
+                      {{ variant.price|floatformat:0|intcomma }} VNĐ
+                  </span><br>
+                  <span style="color: #d70018; font-weight: 600;">
+                      {{ variant.final_price|floatformat:0|intcomma }} VNĐ
+                  </span>
+              {% else %}
+                  <span>{{ variant.price|floatformat:0|intcomma }} VNĐ</span>
+              {% endif %}
+          </div>
+          </div>
+
+          <div class="hover-info">
+            <p>
+              <strong>Tình trạng:</strong> Còn {{ variant.stock_quantity|default:0 }} sản phẩm
+            </p>
+            <p>
+              <strong>Giảm giá:</strong> {{ variant.discount_percent|default:0 }}%
+            </p>
+            <p>
+              <strong>Bảo hành:</strong> {{ product.warranty_months|default:12 }} tháng
+            </p>
+            <p>
+              <strong>Dung lượng:</strong> {{ variant.storage|default:'N/A' }}
+            </p>
+            <p>
+              <strong>Vận chuyển:</strong> {{ product.shipping_info|default:'Miễn phí' }}
+            </p>
+            <p>
+              <strong
+                ><a href="{% url 'product_detail' product_slug=product.slug %}"
+                  >Xem chi tiết sản phẩm</a
+                ></strong
+              >
+            </p>
+          </div>
+          <button 
+                class="product-button add-to-cart-quick" 
+                data-product-id="{{ product.id }}" 
+                data-variant-id="{{ variant.id }}"
+            >
+                Thêm vào giỏ
+            </button>
+        </div>
+            {% endif %}
+          {% endwith %}
+        {% empty %}
+            <div class="no-results-container" style="grid-column: 1 / -1; padding: 50px 20px; text-align: center;">
+              <div class="no-results-icon" style="font-size: 4rem; color: #d2d2d7; margin-bottom: 20px;">
+                <i class="fas fa-search-minus"></i>
+              </div>
+              
+              {% if search_query %}
+                <h2 style="font-size: 24px; color: #1d1d1f; margin-bottom: 10px;">
+                  Không tìm thấy kết quả cho "{{ search_query }}"
+                </h2>
+                <p style="color: #86868b; margin-bottom: 20px;">
+                  Hãy thử kiểm tra lại chính tả hoặc sử dụng các từ khóa khác.
+                </p>
+              {% else %}
+                <h2 style="font-size: 24px; color: #1d1d1f; margin-bottom: 10px;">
+                  Hiện chưa có sản phẩm nào
+                </h2>
+                <p style="color: #86868b;">
+                  Vui lòng quay lại sau.
+                </p>
+              {% endif %}
+            </div>
+          {% endfor %}
+      </div>
+    </main>
+
+    <!--footer-->
+    {% include 'footer.html' %}
+
+    <!-- Chatbox AI-->
+    {% include 'chatbox.html' %}
+
+    <script>
+      const searchInput = document.getElementById("searchInput");
+      const productGrid = document.getElementById("productGrid");
+      const products = Array.from(productGrid.children);
+
+      searchInput.addEventListener("input", () => {
+        const query = searchInput.value.toLowerCase();
+
+        // Tách sản phẩm khớp và không khớp
+        const matched = [];
+        const unmatched = [];
+
+        products.forEach((card) => {
+          const name = card
+            .querySelector(".product-detail h4")
+            .innerText.toLowerCase();
+
+          if (name.includes(query)) {
+            matched.push(card);
+          } else {
+            unmatched.push(card);
+          }
+        });
+
+        // Xóa toàn bộ grid và sắp lại thứ tự
+        productGrid.innerHTML = "";
+
+        // Hiện sản phẩm khớp, ẩn sản phẩm không khớp
+        matched.forEach((card) => {
+          card.style.display = "block";
+          productGrid.appendChild(card);
+        });
+        unmatched.forEach((card) => {
+          card.style.display = "none";
+          productGrid.appendChild(card);
+        });
+      });
+    </script>
+
+    <script>
+      // Isotope Filter Script
+      var iso = new Isotope("#productGrid", {
+        itemSelector: ".product-card",
+        layoutMode: "fitRows",
+        transitionDuration: 0,
+      });
+
+      function applyFilter() {
+        let series = document.getElementById("filterSeries").value;
+        let status = document.getElementById("filterStatus").value;
+        let storage = document.getElementById("filterStorage").value;
+        let price = document.getElementById("filterPrice").value;
+
+        iso.arrange({
+          filter: function (item) {
+            let pSeries = item.getAttribute("data-series");
+            let pStatus = item.getAttribute("data-status");
+            let pStorage = item.getAttribute("data-storage");
+            let pPrice = parseInt(item.getAttribute("data-price"));
+
+            // Filter theo series
+            if (series !== "*" && pSeries !== series) return false;
+
+            // Filter theo trạng thái (new, bestseller, promo)
+            if (status !== "*" && pStatus !== status) return false;
+
+            // Filter storage
+            if (storage !== "*" && pStorage !== storage) return false;
+
+            // Filter giá:
+            if (price === "1" && pPrice > 10000000) return false;
+            if (price === "2" && (pPrice < 10000000 || pPrice > 20000000))
+              return false;
+            if (price === "3" && pPrice < 20000000) return false;
+
+            return true;
+          },
+        });
+      }
+
+      // Gọi lại filter khi thay đổi
+      document.querySelectorAll(".filter-bar select").forEach((sel) => {
+        sel.addEventListener("change", applyFilter);
+      });
+    </script>
+
+    <script>
+      $(document).ready(function() {
+          // Sử dụng ủy quyền sự kiện để Isotope không làm hỏng nút bấm
+          $('#productGrid').on('click', '.add-to-cart-quick', function(e) {
+              e.preventDefault();
+              
+              let button = $(this);
+              let productId = button.data('product-id');
+              let variantId = button.data('variant-id');
+              
+              button.prop('disabled', true).text('...');
+
+              $.ajax({
+                  url: "{% url 'add_to_cart' %}", // Dùng tag url của Django cho chắc chắn
+                  method: "POST",
+                  data: {
+                      'product_id': productId,
+                      'variant_id': variantId,
+                      'quantity': 1,
+                      'csrfmiddlewaretoken': '{{ csrf_token }}'
+                  },
+                  success: function(response) {
+                      if (response.status === 'success') {
+                          alert("Đã thêm iPhone vào giỏ hàng!");
+                          // Cập nhật số lượng trên Navbar
+                          $('.cart-count').text(response.total_items);
+                      }
+                      button.prop('disabled', false).text('Thêm vào giỏ');
+                  },
+                  error: function(xhr) {
+                      if (xhr.status === 403) {
+                          alert("Vui lòng đăng nhập.");
+                      } else {
+                          alert("Lỗi kết nối server.");
+                      }
+                      button.prop('disabled', false).text('Thêm vào giỏ');
+                  }
+              });
+          });
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
+    <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.js"></script>
+    <script src="{% static 'js/app.js' %}"></script>
+  </body>
+</html>

@@ -1,0 +1,271 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apple-shops-home</title>
+
+    <!-- google font-->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <!--style -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <!--icon: font awesome-->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+    />
+
+    <!--swiperjs-->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css"
+    />
+  </head>
+
+  <body>
+    <!--navbar-->
+    {% include 'navbar.html' %}
+
+    <!-- header-->
+    <header id="home">
+      <div class="swiper mySwiper">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide">
+            <img src="{% static 'images/iphone-header.png' %}" />
+            <div class="swiper-desc">
+              <h1>
+                Discover Your <br />
+                Own Style
+              </h1>
+              <p>
+                Chào mừng bạn đến với Apple Shops – nơi mang đến những sản phẩm
+                Apple chính hãng với chất lượng hàng đầu và dịch vụ tận tâm. Tại
+                đây, bạn có thể dễ dàng tìm thấy các dòng sản phẩm mới nhất như
+                iPhone, iPad, MacBook, AirPods và phụ kiện cao cấp. Chúng tôi
+                cam kết mang đến trải nghiệm mua sắm hiện đại, tiện lợi và đáng
+                tin cậy, giúp bạn tận hưởng trọn vẹn hệ sinh thái công nghệ đẳng
+                cấp từ Apple.
+              </p>
+              <button class="swiper-btn">Check now</button>
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <img src="{% static 'images/ipad-header.png' %}" />
+            <div class="swiper-desc desc2">
+              <h1>Shopping The Way <br />You Like It</h1>
+              <p>
+                Việc mua sắm tại Apple Shops thật đơn giản và nhanh chóng. Chỉ
+                với vài thao tác, bạn có thể chọn sản phẩm yêu thích, thêm vào
+                giỏ hàng và hoàn tất thanh toán an toàn. Chúng tôi hỗ trợ nhiều
+                phương thức thanh toán tiện lợi cùng dịch vụ giao hàng tận nơi,
+                giúp bạn nhận được sản phẩm Apple chính hãng trong thời gian sớm
+                nhất.
+              </p>
+              <button class="swiper-btn">Check Now</button>
+            </div>
+          </div>
+        </div>
+        <div class="swiper-pagination"></div>
+      </div>
+    </header>
+
+{% if active_campaign %}
+    <section class="campaign-banner" style="margin: 20px 0; padding: 0 5%;">
+        <div style="position: relative; border-radius: 15px; overflow: hidden; background: linear-gradient(90deg, #ff416c, #ff4b2b); color: white; display: flex; align-items: center; min-height: 200px;">
+            {% if active_campaign.banner_image %}
+                <img src="{{ active_campaign.banner_image.url }}" style="position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.3;">
+            {% endif %}
+            
+            <div style="position: relative; padding: 40px; z-index: 1;">
+                <span style="background: white; color: #ff416c; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9em;">
+                    PROMOTION: {{ active_campaign.category.name.upper }}
+                </span>
+                <h2 style="font-size: 2.5em; margin: 10px 0;">{{ active_campaign.name }}</h2>
+                <p style="font-size: 1.2em;">Giảm giá đồng loạt <strong style="font-size: 1.5em;">{{ active_campaign.discount_percent }}%</strong> cho toàn bộ sản phẩm thuộc danh mục {{ active_campaign.category.name }}.</p>
+                <a href="{% url active_campaign.category.slug %}" style="display: inline-block; margin-top: 15px; padding: 10px 25px; background: white; color: black; text-decoration: none; border-radius: 5px; font-weight: bold;">Shop Now</a>
+            </div>
+            
+            <div style="margin-left: auto; padding-right: 50px; text-align: right; z-index: 1;">
+                <p style="margin: 0;">Kết thúc sau:</p>
+                <div id="campaign-timer" style="font-size: 1.5em; font-weight: bold; display: flex; gap: 10px; justify-content: flex-end; margin-top: 5px;">
+                  <div style="text-align: center;"><span id="days">00</span><small style="display: block; font-size: 0.4em;">Ngày</small></div>
+                  <div>:</div>
+                  <div style="text-align: center;"><span id="hours">00</span><small style="display: block; font-size: 0.4em;">Giờ</small></div>
+                  <div>:</div>
+                  <div style="text-align: center;"><span id="minutes">00</span><small style="display: block; font-size: 0.4em;">Phút</small></div>
+                  <div>:</div>
+                  <div style="text-align: center;"><span id="seconds">00</span><small style="display: block; font-size: 0.4em;">Giây</small></div>
+              </div>
+            </div>
+        </div>
+    </section>
+  {% endif %}
+
+    <!--Guarantee-->
+    <section class="guarantee">
+      <div class="guarantee-wrapper">
+        <div class="guarantee-card">
+          <i class="fas fa-truck guarantee-icon"></i>
+          <div class="guarantee-text">
+            <h3>Free Shipping</h3>
+            <p>Free shipping worldwide on order more than 500$. Buy now!</p>
+          </div>
+        </div>
+        <div class="guarantee-card">
+          <i class="fas fa-truck-loading guarantee-icon"></i>
+          <div class="guarantee-text">
+            <h3>30-Day Returns</h3>
+            <p>If you don't like the product, you have 30 days to return it!</p>
+          </div>
+        </div>
+        <div class="guarantee-card">
+          <i class="fas fa-money-bill-wave guarantee-icon"></i>
+          <div class="guarantee-text">
+            <h3>100% Money Refund</h3>
+            <p>
+              We commited to sell original product, we will refund your money if
+              the products are fake
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!--collection-->
+    <section class="collection" id="collection">
+      <h1 class="heading-title">Discover Collections</h1>
+      <div class="collection-grid">
+        <a href="{% url 'iphone' %}" class="collection-card">
+          <img src="{% static 'images/collection-1.jpg' %}" alt="iPhone" />
+          <div class="collection-detail">
+            <h2>iPhone</h2>
+            <span>Shop now <i class="fas fa-long-arrow-alt-right"></i></span>
+          </div>
+        </a>
+
+        <a href="{% url 'ipad' %}" class="collection-card">
+          <img src="{% static 'images/collection-2.jpg' %}" alt="iPad" />
+          <div class="collection-detail">
+            <h2>iPad</h2>
+            <span>Shop now <i class="fas fa-long-arrow-alt-right"></i></span>
+          </div>
+        </a>
+
+        <a href="{% url 'macbook' %}" class="collection-card">
+          <img src="{% static 'images/collection-3.jpg' %}" alt="Macbook" />
+          <div class="collection-detail">
+            <h2>Macbook</h2>
+            <span>Shop now <i class="fas fa-long-arrow-alt-right"></i></span>
+          </div>
+        </a>
+
+        <a href="{% url 'phukien' %}" class="collection-card">
+          <img src="{% static 'images/collection-6.jpeg' %}" alt="Phụ kiện" />
+          <div class="collection-detail">
+            <h2>Phụ kiện</h2>
+            <span>Shop now <i class="fas fa-long-arrow-alt-right"></i></span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!--product-->
+    <section class="product" id="product">
+      <h1 class="heading-title">New Products</h1>
+      <!--Product list-->
+      <div class="product-wrapper">
+          {% for product in products %}
+          <div class="product-card">
+              
+              <div class="product-tags" style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 10;">
+                  <div class="product-label label-red" style="position: static;">New</div>
+
+                  {% if product.first_variant and product.first_variant.discount_percent > 0 %}
+                      <div class="product-label label-yellow" style="position: static; background-color: #ff9800;">
+                          -{{ product.first_variant.discount_percent }}%
+                      </div>
+                  {% endif %}
+              </div>
+
+              {% if product.first_variant and product.first_variant.image %}
+                  <img class="product-image" src="{{ product.first_variant.image.url }}" alt="{{ product.name }}" />
+              {% else %}
+                  <img class="product-image" src="{% static 'images/default.jpg' %}" alt="No image" />
+              {% endif %}
+
+              <div class="product-detail">
+                  <h4>{{ product.name }} <i class="far fa-heart"></i></h4>
+                  
+                  {% if product.first_variant %}
+                      <div class="price-box">
+                          {% if product.first_variant.price > product.first_variant.final_price %}
+                              <span style="text-decoration: line-through; color: #888; font-size: 0.9em;">
+                                  {{ product.first_variant.price|floatformat:0 }} VNĐ
+                              </span>
+                              <br>
+                              <span style="color: #e91e63; font-weight: bold;">
+                                  {{ product.first_variant.final_price|floatformat:0 }} VNĐ
+                              </span>
+                          {% else %}
+                              <span>{{ product.first_variant.price|floatformat:0 }} VNĐ</span>
+                          {% endif %}
+                      </div>
+                  {% else %}
+                      <span>Liên hệ giá</span>
+                  {% endif %}
+              </div>
+
+              <a href="{% url 'product_detail' product.slug %}" style="text-decoration: none;">
+                  <button class="product-button">Chi tiết</button>
+              </a>
+          </div>
+          {% endfor %}
+      </div>
+    </section>
+
+    <!--footer-->
+    {% include 'footer.html' %}
+
+    <!-- Chatbox AI-->
+    {% include 'chatbox.html' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
+    <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.js"></script>
+    <script src="{% static 'js/app.js' %}"></script>
+    <script>
+    // Lấy thời gian kết thúc từ Django (định dạng ISO để JS đọc được chính xác)
+    const endDateStr = "{{ active_campaign.end_date|date:'c' }}"; 
+    const countDownDate = new Date(endDateStr).getTime();
+
+    const x = setInterval(function() {
+        const now = new Date().getTime();
+        const distance = countDownDate - now;
+
+        // Tính toán Ngày, Giờ, Phút, Giây
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        // Hiển thị kết quả vào các thẻ tương ứng
+        document.getElementById("days").innerHTML = days < 10 ? "0" + days : days;
+        document.getElementById("hours").innerHTML = hours < 10 ? "0" + hours : hours;
+        document.getElementById("minutes").innerHTML = minutes < 10 ? "0" + minutes : minutes;
+        document.getElementById("seconds").innerHTML = seconds < 10 ? "0" + seconds : seconds;
+
+        // Nếu hết hạn, hiển thị thông báo hoặc ẩn banner
+        if (distance < 0) {
+            clearInterval(x);
+            document.getElementById("campaign-timer").innerHTML = "CHƯƠNG TRÌNH ĐÃ KẾT THÚC";
+            // Tùy chọn: Tự động tải lại trang để cập nhật giá về mặc định
+            // window.location.reload();
+        }
+    }, 1000);
+</script>
+  </body>
+</html>

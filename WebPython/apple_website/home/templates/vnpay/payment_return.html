@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả thanh toán - Apple Shop</title>
+    <link rel="stylesheet" href="{% static 'vnpay_static/css/payment_qr.css' %}">
+    <link rel="stylesheet" href="{% static 'vnpay_static/css/payment_refund.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<div class="payment-container">
+    <div class="header">
+        <h2>Apple Shop</h2>
+    </div>
+
+    {% if vnp_ResponseCode == '00' %}
+        <div class="status-icon success-color text-center">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h2 class="status-text success-color text-center">Thanh toán thành công</h2>
+        <p class="instruction text-center">Cảm ơn bạn! Đơn hàng của bạn đang được xử lý.</p>
+    {% else %}
+        <div class="status-icon error-color text-center">
+            <i class="fas fa-times-circle"></i>
+        </div>
+        <h2 class="status-text error-color text-center">Thanh toán thất bại</h2>
+        <p class="instruction text-center">Đã có lỗi xảy ra (Mã lỗi: {{ vnp_ResponseCode }}).</p>
+    {% endif %}
+
+    <div class="order-info">
+        <div class="info-row">
+            <span class="info-label">Mã hóa đơn:</span>
+            <span class="info-value">#{{ order_id }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Số tiền:</span>
+            {% load humanize %}
+            <span class="info-value amount-highlight">{{ amount|intcomma  }} VNĐ</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Nội dung:</span>
+            <span class="info-value">{{ order_desc }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Mã giao dịch:</span>
+            <span class="info-value">{{ vnp_TransactionNo }}</span>
+        </div>
+    </div>
+
+    <div class="action-group" style="display: flex; flex-direction: column; gap: 10px;">
+        <a href="{% url 'index' %}" class="btn-mobile btn-home">
+            <i class="fas fa-home" style="margin-right: 8px;"></i> Về trang chủ
+        </a>
+
+        {% if vnp_ResponseCode != '00' %}
+        <a href="{% url 'payment' %}" class="btn-mobile" style="background: var(--vnpay-blue);">
+            <i class="fas fa-redo" style="margin-right: 8px;"></i> Thử lại thanh toán
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="footer-note text-center">
+        Nếu cần hỗ trợ, vui lòng gọi <strong>1900 xxxx</strong>
+    </div>
+</div>
+
+</body>
+</html>
